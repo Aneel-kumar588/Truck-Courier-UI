@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Order Tracking with Map and Address</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        padding: 20px;
+      }
+      .tracking-container {
+        max-width: 600px;
+        margin: 20px auto;
+        border: 1px solid #ddd;
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        text-align: center;
+        color: #007bff;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 5px;
+      }
+      .form-group input {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+      .button {
+        background-color: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        cursor: pointer;
+        width: 100%;
+      }
+      .button:hover {
+        background-color: #0056b3;
+      }
+      .result {
+        margin-top: 20px;
+      }
+      .result p {
+        margin: 5px 0;
+      }
+      #map {
+        height: 300px;
+        width: 100%;
+        margin-top: 20px;
+        display: none; /* Initially hidden, will show when coordinates are available */
+      }
+      .status-updates {
+        list-style-type: none;
+        padding: 0;
+      }
+      .status-updates li {
+        background-color: #f9f9f9;
+        margin: 10px 0;
+        padding: 10px;
+        border-left: 4px solid #007bff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tracking-container">
+      <h2>Order Tracking</h2>
+      <div class="form-group">
+        <label for="trackingInput">Tracking Number:</label>
+        <input
+          type="text"
+          id="trackingInput"
+          placeholder="Enter tracking number"
+        />
+      </div>
+      <button class="button" id="trackButton">Track Order</button>
+
+      <div class="result" id="resultContainer" style="display: none">
+        <h4>Tracking Details</h4>
+        <p><strong>Truck Number:</strong> <span id="truckNumber"></span></p>
+        <p><strong>Receiver Name:</strong> <span id="receiverName"></span></p>
+        <p><strong>Status:</strong> <span id="currentStatus"></span></p>
+        <div>
+          <h4>Current Location</h4>
+          <p><strong>Address:</strong> <span id="currentAddress"></span></p>
+          <p><strong>Coordinates:</strong> <span id="coordinates"></span></p>
+        </div>
+        <div>
+          <h4>Journey Progress</h4>
+          <ul class="status-updates" id="statusUpdates"></ul>
+        </div>
+        <!-- Map container added below tracking details -->
+        <div id="map"></div>
+      </div>
+    </div>
+
+    <!-- Include Leaflet.js -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+    <script>
+      // Function to initialize the map when coordinates are available
+      function initializeMap(latitude, longitude) {
+        // Create the map and center it on the truck's location
+        const map = L.map("map").setView([latitude, longitude], 13);
+
+        // Add OpenStreetMap tiles
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        }).addTo(map);
+
+        // Add a marker for the truck's location
+        L.marker([latitude, longitude])
+          .addTo(map)
+          .bindPopup(
+            `<strong>Truck Location</strong><br>Latitude: ${latitude}<br>Longitude: ${longitude}`
+          )
+          .openPopup();
+      }
+
+      // Function to reverse geocode and get the address from latitude and longitude
+      async function getAddressFromCoordinates(lat, lon) {
+        const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`;
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          return data.address.city || data.address.town || data.address.village || "Unknown location";
+        } catch (error) {
+          console.error("Error getting address:", error);
+          return "Unknown location";
+        }
+      }
+
+      document
+        .getElementById("trackButton")
+        .addEventListener("click", async () => {
+          const trackingNumber = document.getElementById("trackingInput").value;
+          if (!trackingNumber) {
+            alert("Please enter a tracking number.");
+            return;
+          }
+
+          try {
+            // Fetch the tracking data from the API
+            const response = await fetch(
+              `http://pserv.atksrv.net:3000/orders/track/${trackingNumber}`
+            );
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            const data = await response.json();
+
+            // Update the HTML with the fetched data
+            document.getElementById("truckNumber").textContent =
+              data.TruckNumber || "N/A";
+            document.getElementById("receiverName").textContent =
+              data.ReceiverName || "N/A";
+            document.getElementById("currentStatus").textContent =
+              data.StatusName || "N/A";
+            document.getElementById("coordinates").textContent = `(${
+              data.CurrentLatitude || "N/A"
+            }, ${data.CurrentLongitude || "N/A"})`;
+
+            // Show the result container
+            document.getElementById("resultContainer").style.display = "block";
+
+            // If we have valid coordinates, show the map and get the address
+            if (data.CurrentLatitude && data.CurrentLongitude) {
+              const latitude = data.CurrentLatitude;
+              const longitude = data.CurrentLongitude;
+
+              // Display the map
+              document.getElementById("map").style.display = "block"; 
+              initializeMap(latitude, longitude);
+
+              // Reverse geocode to get the city/address
+              const address = await getAddressFromCoordinates(latitude, longitude);
+              document.getElementById("currentAddress").textContent = address;
+            } else {
+              document.getElementById("map").style.display = "none";
+              document.getElementById("currentAddress").textContent = "Location not available";
+            }
+
+            // Optionally update journey progress if applicable
+            const statusUpdatesElement =
+              document.getElementById("statusUpdates");
+            statusUpdatesElement.innerHTML = ""; // Clear previous updates
+            const journeyUpdates = data.journeyProgress || [];
+            journeyUpdates.forEach((update) => {
+              statusUpdatesElement.innerHTML += `<li>${update}</li>`;
+            });
+          } catch (error) {
+            console.error("Error fetching tracking details:", error);
+            alert("Error fetching tracking details. Please try again later.");
+          }
+        });
+    </script>
+  </body>
+</html>

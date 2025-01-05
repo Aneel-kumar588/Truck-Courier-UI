@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Truck Booking System</title>
+    <style>
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        width: 90%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-top: 20px;
+      }
+      h1 {
+        text-align: center;
+        color: #007bff;
+        margin-bottom: 30px;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        background-color: #007bff;
+        color: white;
+      }
+      .header h2 {
+        margin: 0;
+      }
+      .login-button {
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      .login-button:hover {
+        background-color: #218838;
+      }
+      .form-group {
+        margin-bottom: 15px;
+      }
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: bold;
+      }
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+      .form-group input:focus,
+      .form-group select:focus {
+        border-color: #007bff;
+        outline: none;
+      }
+      .button {
+        padding: 12px 25px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      .button:hover {
+        background-color: #218838;
+      }
+      .button:disabled {
+        background-color: #ccc;
+        cursor: not-allowed;
+      }
+      .modal {
+        display: none; /* Hide the modal by default */
+        justify-content: center;
+        align-items: center;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .modal-content {
+        background-color: #fff;
+        margin: auto;
+        padding: 30px;
+        border-radius: 8px;
+        width: 60%;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        animation: modalFade 0.3s ease;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+      @keyframes modalFade {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+      }
+      .close:hover,
+      .close:focus {
+        color: #333;
+        text-decoration: none;
+        cursor: pointer;
+      }
+      .card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 20px;
+        padding: 15px;
+        width: 300px;
+        display: inline-block;
+        vertical-align: top;
+        transition: transform 0.2s ease-in-out;
+      }
+      .card:hover {
+        transform: scale(1.03);
+      }
+      .card img {
+        width: 100%;
+        height: auto;
+        border-radius: 5px;
+        margin-bottom: 10px;
+      }
+      .card h3 {
+        margin-top: 0;
+        color: #007bff;
+      }
+      .card p {
+        margin: 10px 0;
+        line-height: 1.5;
+        color: #555;
+      }
+      .card button {
+        background-color: #007bff;
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+      .card button:hover {
+        background-color: #0056b3;
+      }
+      #truckDetails {
+        margin-top: 30px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h2>E-LoadingGo Booking System</h2>
+      <button class="button" onclick="window.location.href='Userpage.html'">
+        Login with Admin
+      </button>
+    </div>
+
+    <div class="container">
+      <div class="form-group">
+        <label for="fromCity">From City</label>
+        <select id="fromCity">
+          <option value="">Select From City</option>
+          <option value="Karachi">Karachi</option>
+          <option value="Lahore">Lahore</option>
+          <option value="Islamabad">Islamabad</option>
+          <option value="Peshawar">Peshawar</option>
+
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="toCity">To City</label>
+        <select id="toCity">
+          <option value="">Select To City</option>
+          <option value="Karachi">Karachi</option>
+          <option value="Lahore">Lahore</option>
+          <option value="Islamabad">Islamabad</option>
+          <option value="Peshawar">Peshawar</option>
+
+        </select>
+      </div>
+
+      <button class="button" onclick="getAvailableTrucks()">Get Available Trucks</button>
+
+      <!-- Truck Details -->
+      <div id="truckDetails"></div>
+
+      <!-- Booking Modal -->
+      <div id="bookingModal" class="modal">
+        <div class="modal-content">
+          <span class="close" onclick="closeModal()">&times;</span>
+          <h2>Confirm Your Booking</h2>
+
+          <div class="form-group">
+            <label>Remaining Capacity (kg):</label>
+            <span id="remainingCapacity" style="font-weight: bold;">Loading...</span>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmTruckNumber">Truck Number</label>
+            <input type="text" id="confirmTruckNumber" readonly />
+          </div>
+          <div class="form-group">
+            <label for="parcelWeight">Parcel Weight (kg)</label>
+            <input type="number" id="parcelWeight" required />
+          </div>
+          <div class="form-group">
+            <label for="confirmContactNumber">Contact Number</label>
+            <input type="text" id="confirmContactNumber" required />
+          </div>
+          <div class="form-group">
+            <button class="button" onclick="confirmBooking()">Confirm Booking</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let currentRemainingCapacity = 0; // Global variable to track remaining capacity
+    
+      // Function to get available trucks based on selected cities
+      async function getAvailableTrucks() {
+        const fromCity = document.getElementById("fromCity").value;
+        const toCity = document.getElementById("toCity").value;
+    
+        if (!fromCity || !toCity) {
+          alert("Please select both From City and To City.");
+          return;
+        }
+    
+        try {
+          const response = await fetch(
+            `http://pserv.atksrv.net:3000/trucks?fromCity=${fromCity}&toCity=${toCity}`
+          );
+          const trucks = await response.json();
+    
+          if (trucks.length === 0) {
+            document.getElementById("truckDetails").innerHTML =
+              "<p>No trucks available on this route.</p>";
+            return;
+          }
+    
+          // Display available trucks
+          let html = trucks
+            .map(
+              (truck) => `
+                  <div class="card">
+                    <h3>Truck: ${truck.TruckNumber}</h3>
+                    <p>Driver: ${truck.DriverName}</p>
+                    <p>Capacity: ${truck.capacity} kg</p>
+                    <button onclick="openBookingModal('${truck.TruckNumber}', ${truck.capacity})">Book Now</button>
+                  </div> 
+                `
+            )
+            .join("");
+          document.getElementById("truckDetails").innerHTML = html;
+        } catch (error) {
+          console.error("Error fetching trucks:", error.message);
+          alert("Failed to fetch available trucks.");
+        }
+      }
+    
+      // Function to open the booking modal
+      async function openBookingModal(truckNumber, capacity) {
+        try {
+          const response = await fetch(
+            `http://pserv.atksrv.net:3000/trucks/${truckNumber}/remainingCapacity`
+          );
+          const data = await response.json();
+    
+          if (!response.ok) {
+            throw new Error("Failed to fetch remaining capacity.");
+          }
+    
+          currentRemainingCapacity = data.remainingCapacity; // Update global variable
+          document.getElementById("confirmTruckNumber").value = truckNumber;
+          document.getElementById("remainingCapacity").textContent = `${currentRemainingCapacity} kg`;
+          document.getElementById("bookingModal").style.display = "block";
+        } catch (error) {
+          console.error("Error fetching remaining capacity:", error.message);
+          alert("Failed to fetch remaining capacity.");
+        }
+      }
+    
+      // Function to close the modal
+      function closeModal() {
+        document.getElementById("bookingModal").style.display = "none";
+      }
+    
+      // Function to confirm a booking
+      async function confirmBooking() {
+        const truckNumber = document.getElementById("confirmTruckNumber").value;
+        const parcelWeight = parseInt(document.getElementById("parcelWeight").value);
+        const contactNumber = document.getElementById("confirmContactNumber").value;
+        const fromCity = document.getElementById("fromCity").value;
+        const toCity = document.getElementById("toCity").value;
+    
+        if (parcelWeight <= 0 || parcelWeight > currentRemainingCapacity) {
+          alert(
+            `Please enter a valid parcel weight within the remaining capacity of ${currentRemainingCapacity} kg.`
+          );
+          return;
+        }
+    
+        if (!/^\d{10,13}$/.test(contactNumber)) {
+          alert("Please enter a valid contact number with 10-13 digits.");
+          return;
+        }
+    
+        const payload = {
+          truckNumber,
+          parcelWeight,
+          contactNumber,
+        };
+    
+        try {
+          const response = await fetch("http://pserv.atksrv.net:3000/bookings", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+    
+          const data = await response.json();
+    
+          if (response.ok) {
+            currentRemainingCapacity -= parcelWeight;
+            alert(
+              `Booking Successful!\nTracking Number: ${data.trackingNumber}\nRemaining Capacity: ${currentRemainingCapacity} kg`
+            );
+    
+            document.getElementById("remainingCapacity").textContent = `${currentRemainingCapacity} kg`;
+            closeModal();
+    
+            // Call API for stops and send SMS
+            await fetchCityStopsAndSendSms(
+              data.trackingNumber,
+              parcelWeight,
+              fromCity,
+              toCity,
+              contactNumber
+            );
+          } else {
+            alert("Error: " + data.message);
+          }
+        } catch (error) {
+          console.error("Error confirming booking:", error.message);
+          alert("Failed to confirm booking. Please try again later.");
+        }
+      }
+    
+      // Function to fetch city stops and send SMS
+      async function fetchCityStopsAndSendSms(
+        trackingNumber,
+        parcelWeight,
+        fromCity,
+        toCity,
+        contactNumber
+      ) {
+        try {
+          const response = await fetch(
+            `http://pserv.atksrv.net:3000/city-stops/${toCity}`
+          );
+    
+          if (!response.ok) {
+            throw new Error(`Failed to fetch city stops for ${toCity}`);
+          }
+    
+          const cityStops = await response.json();
+          console.log("City Stops Data:", cityStops);
+    
+          // Pick a random stop
+          const randomStop = getRandomStop(cityStops.stops);
+          console.log("Random Stop:", randomStop);
+    
+          // Build stop details for the SMS
+          const stopDetails = `${randomStop.stopName} at ${randomStop.stopTime}`;
+    
+          // Send SMS with random stop data
+          await sendSms(
+            trackingNumber,
+            parcelWeight,
+            fromCity,
+            toCity,
+            contactNumber,
+            stopDetails
+          );
+          console.log("stopDetails...............",stopDetails);
+          
+        } catch (error) {
+          console.error("Error fetching city stops:", error.message);
+        }
+      }
+    
+      // Function to get a random stop from the stops array
+      function getRandomStop(stops) {
+        if (!stops || stops.length === 0) {
+          throw new Error("Stops array is empty.");
+        }
+    
+        const randomIndex = Math.floor(Math.random() * stops.length);
+        return stops[randomIndex];
+      }
+    
+      async function sendSms(
+  trackingNumber,
+  parcelWeight,
+  fromCity,
+  toCity,
+  contactNumber,
+  stopDetails
+) {
+  const apiKey = "95fcc005c53eaa2e81f96295222aeb53-b2f8f94b-0142-438b-a9fc-64cdea8790cf";
+  const smsUrl = "https://api.infobip.com/sms/2/text/advanced";
+  const pricePerKg = 500; // Price per kg
+  const totalPrice = parcelWeight * pricePerKg;
+
+  // Construct the message text
+  const messageText = `Booking Confirmed! ID: ${trackingNumber}, Wt: ${parcelWeight}kg, Price: Rs ${totalPrice}. Route: ${fromCity} to ${toCity}. Stop: ${stopDetails}.`;
+
+  // Show the message details on a popup
+  const confirmMessage = `
+  SMS Details:
+  -------------------------------
+  Tracking ID: ${trackingNumber}
+  Weight: ${parcelWeight} kg
+  Total Price: Rs ${totalPrice}
+  Route: ${fromCity} to ${toCity}
+  Stop: ${stopDetails}
+  -------------------------------
+  Do you want to send this SMS?
+  `;
+  
+  const userConfirmed = window.confirm(confirmMessage);
+
+  if (!userConfirmed) {
+    alert("SMS sending canceled.");
+    return; // Stop execution if user cancels
+  }
+
+  try {
+    // Send SMS after confirmation
+    const response = await fetch(smsUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `App ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages: [
+          {
+            destinations: [{ to: contactNumber }],
+            from: "447491163443",
+            text: messageText,
+          },
+        ],
+      }),
+    });
+
+    const result = await response.json();
+    console.log("Infobip Response:", result);
+
+    if (response.ok) {
+      console.log(`SMS sent successfully! Message ID: ${result.messages[0].messageId}`);
+      alert("SMS notification sent successfully!");
+    } else {
+      console.error("Error sending SMS:", result);
+      alert("Failed to send SMS notification. Reason: " + JSON.stringify(result));
+    }
+  } catch (error) {
+    console.error("Error sending SMS:", error.message);
+    alert("Failed to send SMS. Please try again later.");
+  }
+}
+  
+    </script>
+
+
+  </body>
+</html>

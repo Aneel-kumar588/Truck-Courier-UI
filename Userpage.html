@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" class="light-style layout-wide customizer-hide" dir="ltr" data-theme="theme-default" data-assets-path="../../assets/" data-template="vertical-menu-template">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+    <title>Demo : Login Cover - Pages | SS - Courier - Bootstrap Dashboard PRO</title>
+    <meta name="description" content="Most Powerful &amp; Comprehensive Bootstrap 5 Admin Dashboard built for developers!" />
+    <meta name="keywords" content="dashboard, bootstrap 5 dashboard, bootstrap 5 design, bootstrap 5" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="https://demos.themeselection.com/SS - Courier-bootstrap-html-admin-template/assets/img/favicon/favicon.ico" />
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700&amp;display=swap" rel="stylesheet" />
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="../../assets/vendor/fonts/boxicons.css" />
+    <link rel="stylesheet" href="../../assets/vendor/fonts/fontawesome.css" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="../../assets/vendor/css/rtl/core.css" class="template-customizer-core-css" />
+    <link rel="stylesheet" href="../../assets/vendor/css/rtl/theme-default.css" class="template-customizer-theme-css" />
+    <link rel="stylesheet" href="../../assets/css/demo.css" />
+
+    <!-- Page CSS -->
+    <link rel="stylesheet" href="../../assets/vendor/css/pages/page-auth.css" />
+
+    <!-- Helpers -->
+    <script src="../../assets/vendor/js/helpers.js"></script>
+
+    <!-- Core JS -->
+    <script src="../../assets/vendor/libs/jquery/jquery.js"></script>
+    <script src="../../assets/vendor/js/bootstrap.js"></script>
+
+    <style>
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="authentication-wrapper authentication-cover">
+        <div class="authentication-inner row m-0">
+            <div class="d-none d-lg-flex col-lg-7 col-xl-8 align-items-center p-5">
+                <div class="w-100 d-flex justify-content-center">
+                    <img src="https://vnextglobal.com/uploads/images/vnext-global-shipstation.png" class="img-fluid" alt="Login image" width="120%" height="100%" />
+                </div>
+            </div>
+
+            <div class="d-flex col-12 col-lg-5 col-xl-4 align-items-center authentication-bg p-sm-5 p-4">
+                <div class="w-px-400 mx-auto">
+                    <h4 class="mb-2">Welcome to Truck Courier Service! 👋</h4>
+                    <p class="mb-4">Please sign in to your account.</p>
+
+                    <form id="formAuthentication" class="mb-3" method="POST" onsubmit="return handleLogin(event)">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email or Username</label>
+                            <input type="text" class="form-control" id="email" name="email-username" placeholder="Enter your email or username" autofocus />
+                        </div>
+                        <div class="mb-3 form-password-toggle">
+                            <div class="input-group input-group-merge">
+                                <input type="password" id="password" class="form-control" name="password" placeholder="**********" />
+                                <span class="input-group-text cursor-pointer"><i class="bx bx-hide"></i></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="button" class="btn btn-link" id="forget-password-btn">Forgot Password?</button>
+                        </div>
+
+                        <button class="btn btn-primary d-grid w-100" type="submit">Sign in</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Forget Password Modal -->
+    <div id="forgetPasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h5>Reset Password</h5>
+            <form id="resetPasswordForm" onsubmit="return handleResetPassword(event)">
+                <div class="mb-3">
+                    <label for="email-reset" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email-reset" placeholder="Enter your email" required />
+                </div>
+                <div class="mb-3">
+                    <label for="new-password" class="form-label">New Password</label>
+                    <input type="password" class="form-control" id="new-password" placeholder="Enter new password" required />
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Reset Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Script -->
+    <script>
+        // Get modal element and button
+        const modal = document.getElementById("forgetPasswordModal");
+        const btn = document.getElementById("forget-password-btn");
+        const span = document.getElementsByClassName("close")[0];
+
+        // Open modal
+        btn.onclick = function () {
+            modal.style.display = "block";
+        };
+
+        // Close modal
+        span.onclick = function () {
+            modal.style.display = "none";
+        };
+
+        // Close if clicked outside the modal
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        };
+
+        // Handle login
+        async function handleLogin(event) {
+            event.preventDefault(); // Prevent form submission
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch('http://pserv.atksrv.net:3000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Redirect to the appropriate dashboard based on user role
+                    window.location.href = "app-logistics-dashboard.html";
+                } else {
+                    alert(data.message || "Login failed. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error during login:", error);
+                alert("An error occurred. Please try again.");
+            }
+        }
+
+        // Handle reset password
+        async function handleResetPassword(event) {
+            event.preventDefault(); // Prevent form submission
+
+            const email = document.getElementById("email-reset").value;
+            const newPassword = document.getElementById("new-password").value;
+
+            try {
+                const response = await fetch('http://pserv.atksrv.net:3000/reset-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email, newPassword }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("Password has been reset successfully.");
+                    modal.style.display = "none"; // Close modal after successful request
+                } else {
+                    alert(data.message || "Password reset failed. Please try again.");
+                }
+            } catch (error) {
+                console.error("Error during password reset:", error);
+                alert("An error occurred. Please try again.");
+            }
+        }
+    </script>
+</body>
+</html>
